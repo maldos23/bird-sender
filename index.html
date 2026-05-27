@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>bird-sender</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="logo">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="20" fill="white"/>
+          <path d="M12 22C12 22 15 18 20 18C25 18 28 22 28 22" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M10 20C10 20 14 14 20 14C26 14 30 20 30 20" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="16" cy="20" r="1.5" fill="black"/>
+          <path d="M28 20L32 18" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span class="logo-text">bird-sender</span>
+      </div>
+      <div class="status" id="status">connecting...</div>
+    </header>
+
+    <main class="main">
+      <section class="drop-zone" id="dropZone">
+        <div class="drop-content">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M32 44V20M32 20L22 30M32 20L42 30" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p class="drop-text">drop files here</p>
+          <p class="drop-subtext">or click to select</p>
+        </div>
+        <input type="file" id="fileInput" multiple hidden>
+      </section>
+
+      <section class="peers-section" id="peersSection">
+        <h2 class="section-title">devices on network</h2>
+        <div class="peers-list" id="peersList"></div>
+      </section>
+
+      <section class="transfers-section" id="transfersSection">
+        <h2 class="section-title">transfers</h2>
+        <div class="transfers-list" id="transfersList"></div>
+      </section>
+    </main>
+
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" id="modal">
+        <h3 class="modal-title">incoming transfer</h3>
+        <p class="modal-text" id="modalText"></p>
+        <div class="modal-files" id="modalFiles"></div>
+        <div class="modal-actions">
+          <button class="btn btn-accept" id="btnAccept">accept</button>
+          <button class="btn btn-reject" id="btnReject">reject</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
