@@ -12,11 +12,14 @@ class BirdSender {
   constructor() {
     this.ws = null;
     this.myId = null;
+    this.myNickname = null;
     this.peers = new Map();
     this.pendingFiles = [];
     this.pendingOffer = null;
+    this.pendingPassword = null;
     this.transfers = new Map();
     this.activeSends = new Map();
+    this.passwordProtectedSends = new Map();
 
     this.dropZone = document.getElementById('dropZone');
     this.fileInput = document.getElementById('fileInput');
@@ -28,6 +31,13 @@ class BirdSender {
     this.modalFiles = document.getElementById('modalFiles');
     this.btnAccept = document.getElementById('btnAccept');
     this.btnReject = document.getElementById('btnReject');
+    this.nicknameInput = document.getElementById('nicknameInput');
+    this.passwordModalOverlay = document.getElementById('passwordModalOverlay');
+    this.passwordModalText = document.getElementById('passwordModalText');
+    this.passwordInput = document.getElementById('passwordInput');
+    this.passwordError = document.getElementById('passwordError');
+    this.btnPasswordAccept = document.getElementById('btnPasswordAccept');
+    this.btnPasswordReject = document.getElementById('btnPasswordReject');
 
     this.init();
   }
@@ -69,16 +79,23 @@ class BirdSender {
         this.myId = msg.id;
         break;
       case 'peers':
-        msg.peers.forEach(id => this.addPeer(id));
+        msg.peers.forEach(peer => this.addPeer(peer.id, peer.nickname));
         this.renderPeers();
         break;
       case 'peer-joined':
-        this.addPeer(msg.peerId);
+        this.addPeer(msg.peerId, msg.nickname);
         this.renderPeers();
         break;
       case 'peer-left':
         this.peers.delete(msg.peerId);
         this.renderPeers();
+        break;
+      case 'peer-updated':
+        const peer = this.peers.get(msg.peerId);
+        if (peer) {
+          peer.nickname = msg.nickname;
+          this.renderPeers();
+        }
         break;
       case 'transfer-offer':
         this.showTransferModal(msg);
@@ -93,6 +110,12 @@ class BirdSender {
             this.activeSends.delete(msg.transferId);
           }
         }
+        break;
+      case 'password-request':
+        this.handlePasswordRequest(msg);
+        break;
+      case 'password-response':
+        this.handlePasswordResponse(msg);
         break;
       case 'transfer-complete':
         const send = this.activeSends.get(msg.transferId);
@@ -149,8 +172,8 @@ class BirdSender {
     }
   }
 
-  addPeer(id) {
-    this.peers.set(id, { id });
+  addPeer(id, nickname) {
+    this.peers.set(id, { id, nickname: nickname || id });
   }
 
   renderPeers() {
@@ -163,10 +186,12 @@ class BirdSender {
     this.peers.forEach((peer) => {
       const el = document.createElement('div');
       el.className = 'peer-item';
+      const displayName = peer.nickname !== peer.id ? `${peer.nickname}` : peer.id;
+      const nicknameTag = peer.nickname !== peer.id ? `<span class="peer-nickname">(${peer.id})</span>` : '';
       el.innerHTML = `
         <div class="peer-info">
           <div class="peer-dot"></div>
-          <span class="peer-id">${peer.id}</span>
+          <span class="peer-id">${displayName}${nicknameTag}</span>
         </div>
         <span class="peer-badge">ready</span>
       `;
@@ -201,6 +226,21 @@ class BirdSender {
 
     this.btnAccept.addEventListener('click', () => this.acceptTransfer());
     this.btnReject.addEventListener('click', () => this.rejectTransfer());
+
+    this.nicknameInput.addEventListener('change', () => {
+      const nickname = this.nicknameInput.value.trim();
+      if (nickname && this.ws && this.ws.readyState === 1) {
+        this.myNickname = nickname;
+        this.ws.send(JSON.stringify({ type: 'set-nickname', nickname }));
+      }
+    });
+
+    this.btnPasswordAccept.addEventListener('click', () => this.submitPassword());
+    this.btnPasswordReject.addEventListener('click', () => this.cancelPassword());
+
+    this.passwordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') this.submitPassword();
+    });
   }
 
   handleFiles(files) {
@@ -215,10 +255,15 @@ class BirdSender {
       sendBar = document.createElement('div');
       sendBar.className = 'send-bar';
       sendBar.innerHTML = `
-        <select id="peerSelect">
-          <option value="">select device</option>
-        </select>
-        <button class="send-btn" id="sendBtn">send</button>
+        <div class="send-bar-row">
+          <select id="peerSelect">
+            <option value="">select device</option>
+          </select>
+          <button class="send-btn" id="sendBtn">send</button>
+        </div>
+        <div class="send-bar-row">
+          <input type="password" class="send-bar-password" id="sendPassword" placeholder="optional password">
+        </div>
       `;
       this.dropZone.after(sendBar);
 
@@ -230,7 +275,8 @@ class BirdSender {
     this.peers.forEach((peer) => {
       const opt = document.createElement('option');
       opt.value = peer.id;
-      opt.textContent = peer.id;
+      const displayName = peer.nickname !== peer.id ? `${peer.nickname} (${peer.id})` : peer.id;
+      opt.textContent = displayName;
       select.appendChild(opt);
     });
 
@@ -275,7 +321,9 @@ class BirdSender {
 
   sendFiles() {
     const select = document.getElementById('peerSelect');
+    const passwordInput = document.getElementById('sendPassword');
     const targetId = select.value;
+    const password = passwordInput ? passwordInput.value : '';
     if (!targetId || this.pendingFiles.length === 0) return;
 
     const transferId = genTransferId();
@@ -285,27 +333,37 @@ class BirdSender {
       type: f.type
     }));
 
+    const hasPassword = password.length > 0;
+
     this.ws.send(JSON.stringify({
       type: 'transfer-offer',
       to: targetId,
       transferId: transferId,
-      files: fileInfo
+      files: fileInfo,
+      hasPassword: hasPassword
     }));
 
-    const transferEl = this.addTransferItem('waiting...', this.pendingFiles, true);
+    if (hasPassword) {
+      this.passwordProtectedSends.set(transferId, password);
+    }
+
+    const transferEl = this.addTransferItem('waiting...', this.pendingFiles, true, hasPassword);
 
     this.activeSends.set(transferId, {
       transferId,
       targetId,
       files: this.pendingFiles,
-      transferEl
+      transferEl,
+      hasPassword
     });
   }
 
   showTransferModal(msg) {
     this.pendingOffer = msg;
     const totalSize = msg.files.reduce((acc, f) => acc + f.size, 0);
-    this.modalText.textContent = `${msg.from} wants to send ${msg.files.length} file(s) — ${this.formatSize(totalSize)}`;
+    const displayName = msg.fromNickname || msg.from;
+    const passwordBadge = msg.hasPassword ? ' 🔒' : '';
+    this.modalText.textContent = `${displayName} wants to send ${msg.files.length} file(s) — ${this.formatSize(totalSize)}${passwordBadge}`;
     this.modalFiles.innerHTML = msg.files.map(f =>
       `<div class="modal-file">${f.name} (${this.formatSize(f.size)})</div>`
     ).join('');
@@ -317,7 +375,85 @@ class BirdSender {
     const from = this.pendingOffer.from;
     const files = this.pendingOffer.files;
     const transferId = this.pendingOffer.transferId;
+    const hasPassword = this.pendingOffer.hasPassword;
 
+    if (hasPassword) {
+      this.showPasswordModal(from, transferId, files);
+    } else {
+      this.completeAccept(from, transferId, files);
+    }
+  }
+
+  showPasswordModal(from, transferId, files) {
+    const displayName = this.pendingOffer.fromNickname || from;
+    this.passwordModalText.textContent = `${displayName} protected this transfer with a password`;
+    this.passwordInput.value = '';
+    this.passwordError.textContent = '';
+    this.pendingPassword = { from, transferId, files };
+    this.passwordModalOverlay.classList.add('active');
+    this.passwordInput.focus();
+  }
+
+  submitPassword() {
+    const password = this.passwordInput.value;
+    if (!password) {
+      this.passwordError.textContent = 'please enter a password';
+      return;
+    }
+
+    this.passwordError.textContent = 'verifying...';
+
+    this.ws.send(JSON.stringify({
+      type: 'password-request',
+      to: this.pendingPassword.from,
+      transferId: this.pendingPassword.transferId,
+      password: password
+    }));
+  }
+
+  cancelPassword() {
+    this.passwordModalOverlay.classList.remove('active');
+    this.ws.send(JSON.stringify({
+      type: 'transfer-response',
+      to: this.pendingPassword.from,
+      transferId: this.pendingPassword.transferId,
+      accepted: false
+    }));
+    this.pendingPassword = null;
+  }
+
+  handlePasswordRequest(msg) {
+    const storedPassword = this.passwordProtectedSends.get(msg.transferId);
+    const valid = storedPassword && storedPassword === msg.password;
+
+    this.ws.send(JSON.stringify({
+      type: 'password-response',
+      to: msg.from,
+      transferId: msg.transferId,
+      valid: valid
+    }));
+
+    if (!valid) {
+      const send = this.activeSends.get(msg.transferId);
+      if (send) {
+        this.updateTransferUI(send.transferEl, 'wrong password', 0);
+      }
+    }
+  }
+
+  handlePasswordResponse(msg) {
+    if (msg.valid) {
+      this.passwordModalOverlay.classList.remove('active');
+      this.completeAccept(this.pendingPassword.from, this.pendingPassword.transferId, this.pendingPassword.files);
+      this.pendingPassword = null;
+    } else {
+      this.passwordError.textContent = 'incorrect password, try again';
+      this.passwordInput.value = '';
+      this.passwordInput.focus();
+    }
+  }
+
+  completeAccept(from, transferId, files) {
     const transferEl = this.addTransferItem('receiving...', files, false);
 
     this.transfers.set(transferId, {
@@ -407,13 +543,14 @@ class BirdSender {
     URL.revokeObjectURL(url);
   }
 
-  addTransferItem(status, files, isSender) {
+  addTransferItem(status, files, isSender, hasPassword = false) {
     const el = document.createElement('div');
     el.className = 'transfer-item';
     const names = files.map(f => f.name).join(', ');
+    const lockIcon = hasPassword ? `<span class="password-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>locked</span>` : '';
     el.innerHTML = `
       <div class="transfer-header">
-        <span class="transfer-name">${isSender ? '→ ' : '← '}${names}</span>
+        <span class="transfer-name">${isSender ? '→ ' : '← '}${names}${lockIcon}</span>
         <span class="transfer-status ${status === 'complete' ? 'complete' : 'sending'}">${status}</span>
       </div>
       <div class="progress-bar">

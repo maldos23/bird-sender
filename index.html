@@ -22,7 +22,10 @@
         </svg>
         <span class="logo-text">bird-sender</span>
       </div>
-      <div class="status" id="status">connecting...</div>
+      <div class="header-right">
+        <input type="text" class="nickname-input" id="nicknameInput" placeholder="your nickname" maxlength="20">
+        <div class="status" id="status">connecting...</div>
+      </div>
     </header>
 
     <main class="main">
@@ -56,6 +59,19 @@
         <div class="modal-actions">
           <button class="btn btn-accept" id="btnAccept">accept</button>
           <button class="btn btn-reject" id="btnReject">reject</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="passwordModalOverlay">
+      <div class="modal" id="passwordModal">
+        <h3 class="modal-title">password required</h3>
+        <p class="modal-text" id="passwordModalText"></p>
+        <input type="password" class="password-input" id="passwordInput" placeholder="enter password">
+        <p class="password-error" id="passwordError"></p>
+        <div class="modal-actions">
+          <button class="btn btn-accept" id="btnPasswordAccept">unlock</button>
+          <button class="btn btn-reject" id="btnPasswordReject">cancel</button>
         </div>
       </div>
     </div>

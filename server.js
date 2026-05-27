@@ -22,6 +22,7 @@ app.get('/', (req, res) => {
 });
 
 const clients = new Map();
+const nicknames = new Map();
 
 function getLocalIP() {
   const nets = networkInterfaces();
@@ -45,20 +46,25 @@ wss.on('connection', (ws) => {
   const clientId = Math.random().toString(36).substring(2, 8);
   clients.set(clientId, ws);
   ws.id = clientId;
+  ws.nickname = clientId;
 
   ws.send(JSON.stringify({ type: 'init', id: clientId }));
 
   const peers = [];
   clients.forEach((client, id) => {
     if (id !== clientId) {
-      peers.push(id);
+      peers.push({ id, nickname: nicknames.get(id) || id });
     }
   });
   ws.send(JSON.stringify({ type: 'peers', peers }));
 
   clients.forEach((client, id) => {
     if (id !== clientId && client.readyState === 1) {
-      client.send(JSON.stringify({ type: 'peer-joined', peerId: clientId }));
+      client.send(JSON.stringify({ 
+        type: 'peer-joined', 
+        peerId: clientId,
+        nickname: nicknames.get(clientId) || clientId
+      }));
     }
   });
 
@@ -76,14 +82,30 @@ wss.on('connection', (ws) => {
     } else {
       const message = JSON.parse(data.toString());
 
+      if (message.type === 'set-nickname') {
+        nicknames.set(clientId, message.nickname);
+        ws.nickname = message.nickname;
+        clients.forEach((client, id) => {
+          if (id !== clientId && client.readyState === 1) {
+            client.send(JSON.stringify({ 
+              type: 'peer-updated', 
+              peerId: clientId,
+              nickname: message.nickname
+            }));
+          }
+        });
+      }
+
       if (message.type === 'transfer-offer') {
         const target = clients.get(message.to);
         if (target && target.readyState === 1) {
           target.send(JSON.stringify({
             type: 'transfer-offer',
             from: clientId,
+            fromNickname: nicknames.get(clientId) || clientId,
             transferId: message.transferId,
-            files: message.files
+            files: message.files,
+            hasPassword: message.hasPassword || false
           }));
         }
       }
@@ -96,6 +118,30 @@ wss.on('connection', (ws) => {
             from: clientId,
             transferId: message.transferId,
             accepted: message.accepted
+          }));
+        }
+      }
+
+      if (message.type === 'password-request') {
+        const target = clients.get(message.to);
+        if (target && target.readyState === 1) {
+          target.send(JSON.stringify({
+            type: 'password-request',
+            from: clientId,
+            transferId: message.transferId,
+            password: message.password
+          }));
+        }
+      }
+
+      if (message.type === 'password-response') {
+        const target = clients.get(message.to);
+        if (target && target.readyState === 1) {
+          target.send(JSON.stringify({
+            type: 'password-response',
+            from: clientId,
+            transferId: message.transferId,
+            valid: message.valid
           }));
         }
       }
@@ -115,6 +161,7 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     clients.delete(clientId);
+    nicknames.delete(clientId);
     clients.forEach((client) => {
       if (client.readyState === 1) {
         client.send(JSON.stringify({ type: 'peer-left', peerId: clientId }));
