@@ -1,4 +1,4 @@
-const {
+import {
   HEADER_SIZE,
   PKT_CHUNK,
   genTransferId,
@@ -6,7 +6,7 @@ const {
   decodeHeader,
   buildPacket,
   formatSize
-} = require('../src/utils.js');
+} from '../src/utils.js';
 
 describe('Protocol Utils', () => {
   describe('genTransferId', () => {

@@ -3,5 +3,6 @@ export default {
   testMatch: ['**/__tests__/**/*.test.js'],
   collectCoverageFrom: ['src/**/*.js'],
   coverageDirectory: 'coverage',
-  verbose: true
+  verbose: true,
+  transform: {}
 };

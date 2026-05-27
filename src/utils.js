@@ -55,18 +55,16 @@ function formatSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    CHUNK_SIZE,
-    HEADER_SIZE,
-    PKT_CHUNK,
-    genTransferId,
-    encodeHeader,
-    decodeHeader,
-    buildPacket,
-    formatSize
-  };
-}
+export {
+  CHUNK_SIZE,
+  HEADER_SIZE,
+  PKT_CHUNK,
+  genTransferId,
+  encodeHeader,
+  decodeHeader,
+  buildPacket,
+  formatSize
+};
 
 if (typeof window !== 'undefined') {
   window.BirdSenderUtils = {
