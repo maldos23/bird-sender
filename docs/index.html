@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bird Sender - Real-time file transfer</title>
+  <meta name="description" content="Transfer files across your local network in real-time. No internet, no clouds, no hassle.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --gray-100: #f5f5f5;
+      --gray-200: #e5e5e5;
+      --gray-400: #a3a3a3;
+      --gray-600: #525252;
+      --gray-800: #262626;
+      --gray-900: #171717;
+      --radius: 24px;
+      --radius-sm: 16px;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--black);
+      color: var(--white);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0;
+      margin-bottom: 80px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .github-link {
+      padding: 12px 24px;
+      background: var(--white);
+      color: var(--black);
+      text-decoration: none;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: transform 0.2s ease;
+    }
+
+    .github-link:hover {
+      transform: scale(1.05);
+    }
+
+    .hero {
+      text-align: center;
+      padding: 80px 0;
+      margin-bottom: 120px;
+    }
+
+    .hero-icon {
+      margin-bottom: 32px;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      margin-bottom: 24px;
+      line-height: 1;
+    }
+
+    .hero p {
+      font-size: clamp(1.125rem, 2vw, 1.5rem);
+      color: var(--gray-400);
+      max-width: 600px;
+      margin: 0 auto 48px;
+      line-height: 1.6;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 16px 32px;
+      border-radius: 100px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--white);
+      color: var(--black);
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.05);
+    }
+
+    .btn-secondary {
+      background: var(--gray-900);
+      color: var(--white);
+    }
+
+    .btn-secondary:hover {
+      background: var(--gray-800);
+      transform: scale(1.05);
+    }
+
+    .features {
+      margin-bottom: 120px;
+    }
+
+    .features h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 64px;
+      letter-spacing: -0.02em;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--gray-900);
+      padding: 32px;
+      border-radius: var(--radius);
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      background: var(--gray-800);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+    }
+
+    .feature-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .feature-card p {
+      color: var(--gray-400);
+      line-height: 1.6;
+    }
+
+    .how-it-works {
+      margin-bottom: 120px;
+    }
+
+    .how-it-works h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 64px;
+      letter-spacing: -0.02em;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .step {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      background: var(--white);
+      color: var(--black);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+
+    .step-content h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .step-content p {
+      color: var(--gray-400);
+      line-height: 1.6;
+    }
+
+    .code-block {
+      background: var(--gray-900);
+      padding: 32px;
+      border-radius: var(--radius);
+      margin: 64px 0;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      line-height: 1.8;
+      color: var(--gray-200);
+    }
+
+    .code-block code {
+      color: var(--white);
+    }
+
+    footer {
+      text-align: center;
+      padding: 48px 0;
+      border-top: 1px solid var(--gray-900);
+      color: var(--gray-600);
+    }
+
+    footer a {
+      color: var(--white);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        padding: 40px 0;
+        margin-bottom: 80px;
+      }
+
+      .features, .how-it-works {
+        margin-bottom: 80px;
+      }
+
+      .cta-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="20" fill="white"/>
+          <path d="M12 22C12 22 15 18 20 18C25 18 28 22 28 22" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M10 20C10 20 14 14 20 14C26 14 30 20 30 20" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="16" cy="20" r="1.5" fill="black"/>
+          <path d="M28 20L32 18" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span>bird-sender</span>
+      </div>
+      <a href="https://github.com/maldos23/bird-sender" class="github-link">View on GitHub</a>
+    </header>
+
+    <section class="hero">
+      <div class="hero-icon">
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="60" fill="white"/>
+          <path d="M36 66C36 66 45 54 60 54C75 54 84 66 84 66" stroke="black" stroke-width="4" stroke-linecap="round"/>
+          <path d="M30 60C30 60 42 42 60 42C78 42 90 60 90 60" stroke="black" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="48" cy="60" r="3" fill="black"/>
+          <path d="M84 60L96 54" stroke="black" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1>bird-sender</h1>
+      <p>Real-time file transfer across your local network. No internet, no clouds, no hassle.</p>
+      <div class="cta-group">
+        <a href="https://github.com/maldos23/bird-sender#-installation" class="btn btn-primary">
+          Get Started
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <a href="https://github.com/maldos23/bird-sender" class="btn btn-secondary">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0110 4.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.137 18.163 20 14.418 20 10c0-5.523-4.477-10-10-10z"/>
+          </svg>
+          View Source
+        </a>
+      </div>
+    </section>
+
+    <section class="features">
+      <h2>Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🚀</div>
+          <h3>Real-time Transfer</h3>
+          <p>Transfer files instantly between devices on the same network with optimized binary protocol.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>100% Local</h3>
+          <p>Your files never leave your network. Complete privacy without external servers or cloud storage.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📦</div>
+          <h3>Any File Type</h3>
+          <p>Transfer files of any type and size. No restrictions, no compression, no quality loss.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Multiple Files</h3>
+          <p>Send multiple files simultaneously with concurrent transfer support.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Optimized Protocol</h3>
+          <p>Custom binary WebSocket protocol with server relay for maximum performance.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Minimalist Design</h3>
+          <p>Clean black and white interface with rounded corners and smooth animations.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="how-it-works">
+      <h2>How It Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Install & Start</h3>
+            <p>Clone the repository, install dependencies, and start the server with a single command.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Open on Multiple Devices</h3>
+            <p>Access the network URL from any device connected to the same WiFi or Ethernet network.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Drag & Drop Files</h3>
+            <p>Drop files into the interface or click to select. Choose the target device from the list.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>Accept & Download</h3>
+            <p>The receiver gets a notification, accepts the transfer, and files download automatically.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <pre><code># Clone the repository
+git clone https://github.com/maldos23/bird-sender.git
+cd bird-sender
+
+# Install dependencies
+npm install
+
+# Start the server
+npm run dev
+
+# Output:
+#   🐦 bird-sender
+#
+#   Local:   http://localhost:3000
+#   Network: http://192.168.1.100:3000</code></pre>
+      </div>
+    </section>
+
+    <footer>
+      <p>
+        Made with 🐦 by the open source community |
+        <a href="https://github.com/maldos23/bird-sender">GitHub</a> |
+        <a href="https://github.com/maldos23/bird-sender/issues">Issues</a> |
+        <a href="https://github.com/maldos23/bird-sender/blob/main/README.md">Documentation</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
