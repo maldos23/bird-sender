@@ -148,6 +148,35 @@ Bird Sender uses a custom binary protocol over WebSocket:
 
 ---
 
+## 🧪 Testing
+
+### Unit Tests (Jest)
+
+```bash
+npm test
+```
+
+### E2E Tests (Cypress)
+
+```bash
+npm run test:e2e
+```
+
+### Coverage Report
+
+```bash
+npm run test:coverage
+```
+
+### CI/CD
+
+Tests run automatically on every push and pull request via GitHub Actions:
+- ✅ Unit tests with Jest (15 tests)
+- ✅ E2E tests with Cypress (12 tests)
+- ✅ Coverage reports uploaded as artifacts
+
+---
+
 ## 🌍 Compatibility
 
 - ✅ Chrome/Edge 90+
