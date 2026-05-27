@@ -1,6 +1,15 @@
 # 🐦 Bird Sender
 
+[![CI Tests](https://github.com/maldos23/bird-sender/actions/workflows/tests.yml/badge.svg)](https://github.com/maldos23/bird-sender/actions/workflows/tests.yml)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen?logo=github)](https://maldos23.github.io/bird-sender/)
+[![Release](https://img.shields.io/github/v/release/maldos23/bird-sender?include_prereleases&logo=github)](https://github.com/maldos23/bird-sender/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![WebSocket](https://img.shields.io/badge/Protocol-WebSocket-yellow?logo=websocket)](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)
+
 **Real-time file transfer across your local network**
+
+🌐 **[Live Demo & Documentation](https://maldos23.github.io/bird-sender/)**
 
 📖 Read this in other languages: [Español](README.es.md) | [中文](README.zh.md)
 
