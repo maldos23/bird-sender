@@ -2,7 +2,7 @@
 
 [![CI Tests](https://github.com/maldos23/bird-sender/actions/workflows/tests.yml/badge.svg)](https://github.com/maldos23/bird-sender/actions/workflows/tests.yml)
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen?logo=github)](https://maldos23.github.io/bird-sender/)
-[![Vercel](https://img.shields.io/badge/Vercel-Demo-black?logo=vercel)](https://https://bird-sender-nemcz9zba-maldos23s-projects.vercel.app)
+[![Vercel](https://img.shields.io/badge/Vercel-Demo-black?logo=vercel)](https://der-nemcz9zba-maldos23s-projects.vercel.app)
 [![Release](https://img.shields.io/github/v/release/maldos23/bird-sender?include_prereleases&logo=github)](https://github.com/maldos23/bird-sender/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -10,7 +10,7 @@
 
 **Real-time file transfer across your local network**
 
-🌐 **[Live Demo & Documentation](https://maldos23.github.io/bird-sender/)** &nbsp;|&nbsp; 🚀 **[View Demo App](https://https://bird-sender-nemcz9zba-maldos23s-projects.vercel.app)**
+🌐 **[Live Demo & Documentation](https://maldos23.github.io/bird-sender/)** &nbsp;|&nbsp; 🚀 **[View Demo App](https://der-nemcz9zba-maldos23s-projects.vercel.app)**
 
 📖 Read this in other languages: [Español](README.es.md) | [中文](README.zh.md)
 
