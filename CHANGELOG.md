@@ -6,20 +6,22 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), y el 
 
 ---
 
-## [Unreleased]
+## [1.1.0] - 2026-05-28
 
 ### Agregado
 - Toggle de tema claro/oscuro con persistencia en `localStorage` y deteccion de `prefers-color-scheme`.
 - Sistema de tokens CSS con `[data-theme="dark"]` y `[data-theme="light"]` para escalar colores facilmente.
 - Toggle de visibilidad de password con icono animado (ojo/eye-off) en el modal de contrasena.
 - Soporte completo de `prefers-reduced-motion` para usuarios con sensibilidad al movimiento.
+- Deploy en Vercel con link al demo en vivo.
+- `CHANGELOG.md` y seccion Changelog en GitHub Pages.
 
 ### Mejorado
 - Paleta de colores migrada de `#000`/`#fff` puro a OKLCH con neutros tintados (azul-gris).
 - Micro-interacciones: hover lift en botones, stagger entrance en peers/transfers, shimmer en progress bars, glow en drop-zone activo.
 - A11y: `aria-label`, `aria-live`, `role`, `aria-modal`, `inert` attribute en modales, focus trap, tecla Escape cierra modales.
 - Logo SVG ahora usa variables CSS (`--logo-circle` / `--logo-stroke`) -- visible en ambos temas.
-- Diseño completamente plano sin bordes ni sombras -- los componentes se distinguen por contraste de fondo.
+- Diseno completamente plano sin bordes ni sombras -- los componentes se distinguen por contraste de fondo.
 - Estructura del CSS reorganizada con tokens de duracion (`--duration-fast/base/slow/entrance`) y easing (`--ease-out-quart/expo`).
 - Responsive: breakpoint a 480px con layout stacked, botones full-width en mobile.
 - Drop-zone migrada de `<div>` a `<button>` para soporte nativo de teclado.
