@@ -16,14 +16,15 @@
     }
 
     :root {
-      --black: #000000;
-      --white: #ffffff;
-      --gray-100: #f5f5f5;
-      --gray-200: #e5e5e5;
-      --gray-400: #a3a3a3;
-      --gray-600: #525252;
-      --gray-800: #262626;
-      --gray-900: #171717;
+      --black: oklch(0.15 0.01 260);
+      --white: oklch(0.98 0.005 260);
+      --gray-100: oklch(0.95 0.005 260);
+      --gray-200: oklch(0.90 0.005 260);
+      --gray-400: oklch(0.70 0.01 260);
+      --gray-600: oklch(0.50 0.01 260);
+      --gray-800: oklch(0.30 0.01 260);
+      --gray-900: oklch(0.20 0.01 260);
+      --accent: oklch(0.75 0.15 260);
       --radius: 24px;
       --radius-sm: 16px;
     }
@@ -34,6 +35,7 @@
       color: var(--white);
       min-height: 100vh;
       overflow-x: hidden;
+      line-height: 1.6;
     }
 
     .container {
@@ -42,12 +44,14 @@
       padding: 24px;
     }
 
+    /* Header */
     header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 24px 0;
       margin-bottom: 80px;
+      animation: fadeInDown 0.8s ease-out;
     }
 
     .logo {
@@ -56,6 +60,19 @@
       gap: 12px;
       font-size: 1.5rem;
       font-weight: 600;
+      transition: transform 0.3s ease;
+    }
+
+    .logo:hover {
+      transform: scale(1.05);
+    }
+
+    .logo svg {
+      transition: transform 0.3s ease;
+    }
+
+    .logo:hover svg {
+      transform: rotate(-10deg);
     }
 
     .github-link {
@@ -66,21 +83,45 @@
       border-radius: 100px;
       font-weight: 600;
       font-size: 0.875rem;
-      transition: transform 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .github-link::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: var(--gray-200);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .github-link:hover::before {
+      width: 300px;
+      height: 300px;
     }
 
     .github-link:hover {
-      transform: scale(1.05);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px oklch(0 0 0 / 0.3);
     }
 
+    /* Hero */
     .hero {
       text-align: center;
       padding: 80px 0;
       margin-bottom: 120px;
+      animation: fadeInUp 1s ease-out 0.2s both;
     }
 
     .hero-icon {
       margin-bottom: 32px;
+      animation: float 3s ease-in-out infinite;
     }
 
     .hero h1 {
@@ -89,6 +130,10 @@
       letter-spacing: -0.04em;
       margin-bottom: 24px;
       line-height: 1;
+      background: linear-gradient(135deg, var(--white) 0%, var(--gray-400) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .hero p {
@@ -112,10 +157,30 @@
       text-decoration: none;
       font-weight: 600;
       font-size: 1rem;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: oklch(1 0 0 / 0.1);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
     }
 
     .btn-primary {
@@ -124,19 +189,23 @@
     }
 
     .btn-primary:hover {
-      transform: scale(1.05);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px oklch(0 0 0 / 0.4);
     }
 
     .btn-secondary {
       background: var(--gray-900);
       color: var(--white);
+      border: 1px solid var(--gray-800);
     }
 
     .btn-secondary:hover {
       background: var(--gray-800);
-      transform: scale(1.05);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px oklch(0 0 0 / 0.3);
     }
 
+    /* Features */
     .features {
       margin-bottom: 120px;
     }
@@ -147,6 +216,7 @@
       text-align: center;
       margin-bottom: 64px;
       letter-spacing: -0.02em;
+      animation: fadeInUp 0.8s ease-out;
     }
 
     .features-grid {
@@ -159,17 +229,50 @@
       background: var(--gray-900);
       padding: 32px;
       border-radius: var(--radius);
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.8s ease-out both;
+    }
+
+    .feature-card:nth-child(1) { animation-delay: 0.1s; }
+    .feature-card:nth-child(2) { animation-delay: 0.2s; }
+    .feature-card:nth-child(3) { animation-delay: 0.3s; }
+    .feature-card:nth-child(4) { animation-delay: 0.4s; }
+    .feature-card:nth-child(5) { animation-delay: 0.5s; }
+    .feature-card:nth-child(6) { animation-delay: 0.6s; }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .feature-card:hover::before {
+      transform: translateX(100%);
     }
 
     .feature-card:hover {
       background: var(--gray-800);
-      transform: translateY(-4px);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px oklch(0 0 0 / 0.4);
     }
 
     .feature-icon {
       font-size: 2.5rem;
       margin-bottom: 16px;
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+      transform: scale(1.2) rotate(5deg);
     }
 
     .feature-card h3 {
@@ -183,6 +286,7 @@
       line-height: 1.6;
     }
 
+    /* How It Works */
     .how-it-works {
       margin-bottom: 120px;
     }
@@ -193,6 +297,7 @@
       text-align: center;
       margin-bottom: 64px;
       letter-spacing: -0.02em;
+      animation: fadeInUp 0.8s ease-out;
     }
 
     .steps {
@@ -207,7 +312,13 @@
       display: flex;
       gap: 24px;
       align-items: flex-start;
+      animation: fadeInLeft 0.8s ease-out both;
     }
+
+    .step:nth-child(1) { animation-delay: 0.1s; }
+    .step:nth-child(2) { animation-delay: 0.2s; }
+    .step:nth-child(3) { animation-delay: 0.3s; }
+    .step:nth-child(4) { animation-delay: 0.4s; }
 
     .step-number {
       flex-shrink: 0;
@@ -221,6 +332,13 @@
       justify-content: center;
       font-weight: 700;
       font-size: 1.25rem;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .step:hover .step-number {
+      transform: scale(1.1) rotate(360deg);
+      box-shadow: 0 10px 30px oklch(0 0 0 / 0.3);
     }
 
     .step-content h3 {
@@ -234,12 +352,27 @@
       line-height: 1.6;
     }
 
+    /* Code Block */
     .code-block {
       background: var(--gray-900);
       padding: 32px;
       border-radius: var(--radius);
       margin: 64px 0;
       overflow-x: auto;
+      position: relative;
+      animation: fadeInUp 0.8s ease-out 0.5s both;
+      border: 1px solid var(--gray-800);
+    }
+
+    .code-block::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, oklch(0.3 0.02 260 / 0.1), transparent);
+      pointer-events: none;
     }
 
     .code-block pre {
@@ -247,28 +380,102 @@
       font-size: 0.875rem;
       line-height: 1.8;
       color: var(--gray-200);
+      position: relative;
+      z-index: 1;
     }
 
     .code-block code {
       color: var(--white);
     }
 
+    /* Footer */
     footer {
       text-align: center;
       padding: 48px 0;
       border-top: 1px solid var(--gray-900);
       color: var(--gray-600);
+      animation: fadeIn 1s ease-out 0.8s both;
     }
 
     footer a {
       color: var(--white);
       text-decoration: none;
+      transition: color 0.3s ease;
+      position: relative;
+    }
+
+    footer a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    footer a:hover::after {
+      width: 100%;
     }
 
     footer a:hover {
-      text-decoration: underline;
+      color: var(--accent);
     }
 
+    /* Animations */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    /* Responsive */
     @media (max-width: 768px) {
       .hero {
         padding: 40px 0;
@@ -287,6 +494,24 @@
         width: 100%;
         justify-content: center;
       }
+
+      .step {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+    }
+
+    /* Scroll animations */
+    .scroll-reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .scroll-reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
   </style>
 </head>
@@ -334,7 +559,7 @@
       </div>
     </section>
 
-    <section class="features">
+    <section class="features scroll-reveal">
       <h2>Features</h2>
       <div class="features-grid">
         <div class="feature-card">
@@ -346,6 +571,11 @@
           <div class="feature-icon">🔒</div>
           <h3>100% Local</h3>
           <p>Your files never leave your network. Complete privacy without external servers or cloud storage.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔐</div>
+          <h3>End-to-End Encryption</h3>
+          <p>AES-GCM 256-bit encryption for password-protected transfers. Your data stays secure.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">📦</div>
@@ -362,15 +592,10 @@
           <h3>Optimized Protocol</h3>
           <p>Custom binary WebSocket protocol with server relay for maximum performance.</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">🎨</div>
-          <h3>Minimalist Design</h3>
-          <p>Clean black and white interface with rounded corners and smooth animations.</p>
-        </div>
       </div>
     </section>
 
-    <section class="how-it-works">
+    <section class="how-it-works scroll-reveal">
       <h2>How It Works</h2>
       <div class="steps">
         <div class="step">
@@ -431,5 +656,48 @@ npm run dev
       </p>
     </footer>
   </div>
+
+  <script>
+    // Scroll reveal animation
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.scroll-reveal').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Parallax effect on hero icon
+    window.addEventListener('scroll', () => {
+      const heroIcon = document.querySelector('.hero-icon');
+      if (heroIcon) {
+        const scrolled = window.pageYOffset;
+        heroIcon.style.transform = `translateY(${scrolled * 0.5}px)`;
+      }
+    });
+  </script>
 </body>
 </html>
