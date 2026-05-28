@@ -127,7 +127,7 @@ class BirdSender {
     }
   }
 
-  handleBinaryMessage(buffer) {
+  async handleBinaryMessage(buffer) {
     if (buffer.byteLength < HEADER_SIZE) return;
 
     const header = decodeHeader(buffer);
@@ -138,8 +138,7 @@ class BirdSender {
 
     if (header.fileIndex !== transfer.currentFileIndex) {
       if (transfer.currentFile && transfer.chunks.length > 0) {
-        const blob = new Blob(transfer.chunks, { type: transfer.currentFile.type || 'application/octet-stream' });
-        this.downloadFile(blob, transfer.currentFile.name);
+        await this.finalizeFile(transfer);
       }
       transfer.currentFileIndex = header.fileIndex;
       transfer.currentFile = transfer.files[header.fileIndex];
@@ -156,9 +155,7 @@ class BirdSender {
     this.updateTransferUI(transfer.transferEl, `${Math.round(progress)}%`, progress);
 
     if (header.chunkIndex === header.totalChunks - 1 && header.fileIndex === transfer.files.length - 1) {
-      const blob = new Blob(transfer.chunks, { type: transfer.currentFile.type || 'application/octet-stream' });
-      this.downloadFile(blob, transfer.currentFile.name);
-      transfer.chunks = [];
+      await this.finalizeFile(transfer);
 
       this.updateTransferUI(transfer.transferEl, 'complete', 100);
 
@@ -170,6 +167,38 @@ class BirdSender {
 
       this.transfers.delete(transferId);
     }
+  }
+
+  async finalizeFile(transfer) {
+    let data = transfer.chunks;
+    const fileType = transfer.currentFile.type || 'application/octet-stream';
+
+    if (transfer.password) {
+      this.updateTransferUI(transfer.transferEl, 'decrypting...', 99);
+      const encryptedBuffer = new Blob(data).arrayBuffer ? await new Blob(data).arrayBuffer() : await this.blobToArrayBuffer(new Blob(data));
+      try {
+        const decrypted = await this.decryptFile(encryptedBuffer, transfer.password);
+        data = [decrypted];
+      } catch (e) {
+        console.error('Decryption failed:', e);
+        this.updateTransferUI(transfer.transferEl, 'decryption failed', 0);
+        transfer.chunks = [];
+        return;
+      }
+    }
+
+    const blob = new Blob(data, { type: fileType });
+    this.downloadFile(blob, transfer.currentFile.name);
+    transfer.chunks = [];
+  }
+
+  blobToArrayBuffer(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(blob);
+    });
   }
 
   addPeer(id, nickname) {
@@ -444,7 +473,8 @@ class BirdSender {
   handlePasswordResponse(msg) {
     if (msg.valid) {
       this.passwordModalOverlay.classList.remove('active');
-      this.completeAccept(this.pendingPassword.from, this.pendingPassword.transferId, this.pendingPassword.files);
+      const password = this.passwordInput.value;
+      this.completeAccept(this.pendingPassword.from, this.pendingPassword.transferId, this.pendingPassword.files, password);
       this.pendingPassword = null;
     } else {
       this.passwordError.textContent = 'incorrect password, try again';
@@ -453,8 +483,8 @@ class BirdSender {
     }
   }
 
-  completeAccept(from, transferId, files) {
-    const transferEl = this.addTransferItem('receiving...', files, false);
+  completeAccept(from, transferId, files, password = null) {
+    const transferEl = this.addTransferItem('receiving...', files, false, !!password);
 
     this.transfers.set(transferId, {
       transferId,
@@ -464,7 +494,8 @@ class BirdSender {
       currentFile: null,
       chunks: [],
       receivedSize: 0,
-      transferEl
+      transferEl,
+      password
     });
 
     this.ws.send(JSON.stringify({
@@ -492,10 +523,18 @@ class BirdSender {
 
     const files = send.files;
     const transferEl = send.transferEl;
+    const password = send.hasPassword ? this.passwordProtectedSends.get(transferId) : null;
 
     for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
       const file = files[fileIndex];
-      const arrayBuffer = await file.arrayBuffer();
+      let arrayBuffer = await file.arrayBuffer();
+
+      if (password) {
+        this.updateTransferUI(transferEl, 'encrypting...', 0);
+        const encrypted = await this.encryptFile(arrayBuffer, password);
+        arrayBuffer = encrypted;
+      }
+
       const totalChunks = Math.ceil(arrayBuffer.byteLength / CHUNK_SIZE);
 
       for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
@@ -524,6 +563,71 @@ class BirdSender {
     if (preview) preview.remove();
     const sendBar = document.querySelector('.send-bar');
     if (sendBar) sendBar.remove();
+  }
+
+  async encryptFile(arrayBuffer, password) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(password),
+      'PBKDF2',
+      false,
+      ['deriveBits', 'deriveKey']
+    );
+
+    const key = await crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt']
+    );
+
+    const ciphertext = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv },
+      key,
+      arrayBuffer
+    );
+
+    const result = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
+    result.set(salt, 0);
+    result.set(iv, salt.length);
+    result.set(new Uint8Array(ciphertext), salt.length + iv.length);
+
+    return result.buffer;
+  }
+
+  async decryptFile(arrayBuffer, password) {
+    const data = new Uint8Array(arrayBuffer);
+    const salt = data.slice(0, 16);
+    const iv = data.slice(16, 28);
+    const ciphertext = data.slice(28);
+
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(password),
+      'PBKDF2',
+      false,
+      ['deriveBits', 'deriveKey']
+    );
+
+    const key = await crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['decrypt']
+    );
+
+    const plaintext = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv },
+      key,
+      ciphertext
+    );
+
+    return plaintext;
   }
 
   updateTransferUI(transferEl, statusText, progress) {
