@@ -25,6 +25,7 @@ Bird Sender is a minimalist web application that allows you to transfer files of
 
 - 🚀 **Real-time transfer**
 - 🔒 **100% local** - Your files never leave your network
+- 🔐 **End-to-end encryption** - AES-GCM 256-bit encryption for password-protected transfers
 - 📦 **Files of any type and size**
 - 🎯 **Multiple simultaneous files**
 - ⚡ **Optimized binary protocol**
@@ -101,6 +102,49 @@ The server will display two URLs:
 3. **Click "accept"** to receive or "reject" to decline
 
 4. **Files will download automatically**
+
+---
+
+## 🔐 End-to-End Encryption
+
+Bird Sender supports optional end-to-end encryption for sensitive file transfers using industry-standard AES-GCM 256-bit encryption.
+
+### How It Works
+
+1. **Sender sets a password** when sending files (optional)
+2. **Files are encrypted** in the browser before transmission using:
+   - AES-GCM 256-bit encryption
+   - PBKDF2 key derivation with 100,000 iterations
+   - Random 16-byte salt and 12-byte IV per file
+3. **Encrypted data** is transmitted over WebSocket
+4. **Receiver enters password** to decrypt files locally
+5. **Files are decrypted** in the browser and downloaded
+
+### Security Features
+
+- ✅ **Zero-knowledge**: Server never sees passwords or unencrypted data
+- ✅ **Client-side encryption**: All crypto operations happen in the browser
+- ✅ **Strong cryptography**: AES-GCM provides authenticated encryption
+- ✅ **Unique keys**: Each file encrypted with unique salt/IV
+- ✅ **No key storage**: Passwords are never stored or transmitted
+
+### Example
+
+```
+Alice sends "secret.pdf" with password "mypassword123"
+  ↓
+File encrypted with AES-GCM 256-bit (salt + IV + ciphertext)
+  ↓
+Encrypted data transmitted over WebSocket
+  ↓
+Bob receives encrypted file
+  ↓
+Bob enters "mypassword123"
+  ↓
+File decrypted locally and downloaded as "secret.pdf"
+```
+
+**Note**: If the wrong password is entered, decryption will fail and the file will not be downloaded.
 
 ---
 

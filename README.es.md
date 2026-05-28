@@ -25,6 +25,7 @@ Bird Sender es una aplicación web minimalista que te permite transferir archivo
 
 - 🚀 **Transferencia en tiempo real**
 - 🔒 **100% local** - Tus archivos nunca salen de tu red
+- 🔐 **Cifrado de extremo a extremo** - Cifrado AES-GCM de 256 bits para transferencias protegidas con contraseña
 - 📦 **Archivos de cualquier tipo y tamaño**
 - 🎯 **Múltiples archivos simultáneos**
 - ⚡ **Protocolo binario optimizado**
@@ -101,6 +102,49 @@ El servidor mostrará dos URLs:
 3. **Haz clic en "accept"** para recibir o "reject" para rechazar
 
 4. **Los archivos se descargarán automáticamente**
+
+---
+
+## 🔐 Cifrado de Extremo a Extremo
+
+Bird Sender soporta cifrado de extremo a extremo opcional para transferencias de archivos sensibles usando cifrado AES-GCM de 256 bits estándar de la industria.
+
+### Cómo Funciona
+
+1. **El emisor establece una contraseña** al enviar archivos (opcional)
+2. **Los archivos se cifran** en el navegador antes de la transmisión usando:
+   - Cifrado AES-GCM de 256 bits
+   - Derivación de clave PBKDF2 con 100,000 iteraciones
+   - Salt aleatorio de 16 bytes e IV de 12 bytes por archivo
+3. **Los datos cifrados** se transmiten sobre WebSocket
+4. **El receptor ingresa la contraseña** para descifrar los archivos localmente
+5. **Los archivos se descifran** en el navegador y se descargan
+
+### Características de Seguridad
+
+- ✅ **Conocimiento cero**: El servidor nunca ve contraseñas ni datos sin cifrar
+- ✅ **Cifrado del lado del cliente**: Todas las operaciones criptográficas ocurren en el navegador
+- ✅ **Criptografía fuerte**: AES-GCM proporciona cifrado autenticado
+- ✅ **Claves únicas**: Cada archivo cifrado con salt/IV únicos
+- ✅ **Sin almacenamiento de claves**: Las contraseñas nunca se almacenan ni transmiten
+
+### Ejemplo
+
+```
+Alice envía "secreto.pdf" con contraseña "micontraseña123"
+  ↓
+Archivo cifrado con AES-GCM de 256 bits (salt + IV + ciphertext)
+  ↓
+Datos cifrados transmitidos sobre WebSocket
+  ↓
+Bob recibe archivo cifrado
+  ↓
+Bob ingresa "micontraseña123"
+  ↓
+Archivo descifrado localmente y descargado como "secreto.pdf"
+```
+
+**Nota**: Si se ingresa una contraseña incorrecta, el descifrado fallará y el archivo no se descargará.
 
 ---
 
